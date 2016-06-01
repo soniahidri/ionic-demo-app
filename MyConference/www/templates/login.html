@@ -1,0 +1,51 @@
+<!--
+This file is part of MyConference.
+
+MyConference is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License version 3
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should find a copy of the GNU Affero General Public License in the
+root directory along with this program.
+If not, see http://www.gnu.org/licenses/agpl-3.0.html.
+-->
+
+<ion-view view-title="My Account">
+  <ion-content>
+
+
+    <form ng-submit="login(credentials)">
+      <div class="list">
+        <label class="item item-input">
+          <input type="text" placeholder="Username" ng-model="credentials.username" required>
+        </label>
+
+        <label class="item item-input">
+
+          <input type="password" placeholder="Password" ng-model="credentials.password" required>
+        </label>
+
+
+        <div class="item item-button-right">
+          <h2>Remember Me &nbsp <input type="checkbox" ng-model="filter.blue"></h2></ion-checkbox>
+          <button class="button button-positive ">Log In</button>
+        </div>
+      </div>
+
+
+      <div class="col text-right">
+        <a href="#/app/forgotPassword" class="button button-clear button-calm" >Forgot my password ?</a>
+      </div>
+
+
+      </br>
+
+<a href="#/app/register" class="button button-block button-positive">Register</a>
+    </form>
+  </ion-content>
+</ion-view>
