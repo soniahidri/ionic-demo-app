@@ -21,10 +21,10 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
+angular.module('starter', ['ionic', 'starter.controllers'])
 
-  .run(function ($ionicPlatform) {
-    $ionicPlatform.ready(function () {
+  .run(function($ionicPlatform) {
+    $ionicPlatform.ready(function() {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
       if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -39,7 +39,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
     });
   })
 
-  .config(function ($stateProvider, $urlRouterProvider) {
+  .config(function($stateProvider, $urlRouterProvider) {
     $stateProvider
 
 
@@ -49,6 +49,24 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
         abstract: true,
         templateUrl: 'templates/menu.html',
         controller: 'AppCtrl'
+      })
+
+      .state('app.search', {
+        url: '/search',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/search.html'
+          }
+        }
+      })
+
+      .state('app.browse', {
+        url: '/browse',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/browse.html'
+          }
+        }
       })
 
       .state('app.start', {
@@ -74,8 +92,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
       })
 
       .state('app.event', {
-        cache: false,
-        url: '/event/:eventId/:agenda',
+        url: '/event/:eventId',
         views: {
           'menuContent': {
             templateUrl: 'templates/event.html',
@@ -135,16 +152,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
           }
         }
       })
-      
-      .state('app.forgotPassword', {
-        url: '/forgotPassword',
-        views: {
-          'menuContent': {
-            templateUrl: 'templates/forgotPassword.html',
-            controller: 'ForgotCtrl'
-          }
-        }
-      })
 
       .state('app.edit-account', {
         url: '/edit-account',
@@ -155,17 +162,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
           }
         }
       })
-
-    .state('app.transition', {
-      url: '/transition/:to/',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/transition.html',
-          controller: 'TransitionCtrl'
-        },
-      },
-      params: {data: null}
-    });
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/app/start');

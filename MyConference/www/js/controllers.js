@@ -14,7 +14,9 @@
  root directory along with this program.
  If not, see http://www.gnu.org/licenses/agpl-3.0.html.
  */
-angular.module('starter.controllers', ['services', 'ngCordova'])
+
+angular.module('starter.controllers', ['services'])
+
   .controller('AppCtrl', function ($scope, $ionicModal, $timeout, backendService) {
 
     // With the new view caching in Ionic, Controllers are only called
@@ -39,7 +41,9 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
     $scope.login = function () {
       $scope.modal.show();
     };
+
     $scope.isLoggedIn = false;
+
     $scope.$on('user:loginState', function (event, data) {
       // you could inspect the data to see if what you care about changed, or just update your own scope
       $scope.isLoggedIn = backendService.loginStatus;
@@ -79,38 +83,6 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
       })
     })
   })
- /*
-   Controller for forgot password page
-   Calls resetPassword service, shows a popup alert about successful  reset of a password
-   and redirects to login view
-
-   */
-  .controller('ForgotCtrl', function ($scope, $state, backendService, $ionicPopup) {
-    $scope.resetPassword = function(user){
-      console.log("ctrl "+user.email)
-      backendService.resetPassword(user);
-      var alertPopup = $ionicPopup.alert({
-        title: 'Reset Password',
-        template: 'An email has been sent to you with instructions on resetting your password.'
-      });
-      alertPopup.then(function (re) {
-        $state.reload();
-      })
-    }
-  })
-
-
-
-  /*
-   Controller for transition handling
-   redirects to the defined as a parameter state
-   */
-  .controller('TransitionCtrl', function ($scope, $state, $ionicHistory, $stateParams) {
-    $ionicHistory.nextViewOptions({
-      disableBack: true
-    });
-    $state.go($stateParams.to, $stateParams.data)
-  })
 
   /*
    Controller for the Main Page (overview page).
@@ -119,6 +91,7 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
    */
   .controller('MainCtrl', function ($scope, $state, $ionicPopup, backendService) {
     var today = new Date();
+
     /*
      This method is used for filter after prevoius events in the main view
      */
@@ -126,13 +99,16 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
       var itemDate = new Date(item.date);
       return today < itemDate;
     };
+
     /*
      This method is used for filter after next events in the main view
      */
     $scope.nextEvents = function (item) {
       return !$scope.previousEvents(item);
     };
+
     backendService.fetchCurrentUser().then(function (res) {
+
     }, function (error) {
       $state.go('app.start')
     });
@@ -163,69 +139,53 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
 
   /*
    Controller for showing event information
-   Gets event by its id rom backend, gets agenda file name and download url if it exist
-   Contains functions for uploading and downloading a file
+   Gets event by its id form backend
    */
-  .controller('EventCtrl', function ($scope, $state, $stateParams, backendService, $ionicPlatform, $ionicLoading, $ionicPopup, $cordovaInAppBrowser) {
-    $scope.agenda = (typeof $stateParams.agenda !== 'undefined' && $stateParams.agenda != "");
-    $scope.upload = false;
+  .controller('EventCtrl', function ($scope, $state, $ionicPopup, $stateParams, backendService) {
     backendService.getEventById($stateParams.eventId).then(function (res) {
       $scope.event = res['data']
-      if ($scope.agenda) {
-        backendService.getFileDetails(res['data'].fileId).then(function (file) {
-          $scope.filename = file['data'].fileName;
-          $scope.downloadUrl = backendService.getFileUrl(res['data'].fileId)
-        }, function (fileError) {
-          console.log("Error by getting file details")
-        })
-      }
     }, function (error) {
       console.log("Error by retrieving the event", error)
     })
-    $(document).on("submit", "#uploadForm", function(e) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      $ionicLoading.show({
-        content: 'Loading',
-        animation: 'fade-in',
-        showBackdrop: true,
-        maxWidth: 200,
-        showDelay: 0
+    /*
+    function for adding a new agenda in agenda collection
+    in the new agenda object, the ID of the event, in which this agenda has been created
+    is stored
+     */
+    $scope.addingAgenda = function (ag) {
+      backendService.addingAgenda(ag, $stateParams.eventId);
+      var alertPopup = $ionicPopup.alert({
+        title: 'Done!',
+        template: 'New Agenda Point is added.'
       });
-      var formData = new FormData();
-      formData.append('file', $('input[type=file]')[0].files[0])
-      backendService.uploadFile(formData, $stateParams.eventId).then(function (res) {
-        // if there was already an agenda file then delete it
-        if($scope.agenda){
-          backendService.deleteFile($stateParams.agenda);
-        }
-        $ionicLoading.hide();
-        $ionicPopup.alert({
-          title: 'Done!',
-          template: 'File successfully uploaded'
-        }).then(function (re) {
-          res = jQuery.parseJSON(res);
-          $state.go('app.transition', {to: 'app.event', data: {eventId: $stateParams.eventId, agenda: res['data'].id}})
-        })
-      }, function (error) {
-        $ionicLoading.hide();
-        $ionicPopup.alert({
-          title: 'Error',
-          template: 'Error occurred by uploading a file'
-        })
+      alertPopup.then(function (res) {
+        $state.reload()
       })
-    });
-    $scope.download = function (url) {
-      $ionicPlatform.ready(function () {
-        $cordovaInAppBrowser.open(url, '_system')
-          .then(function (event) {
-            // success
-          })
-          .catch(function (event) {
-            // error
-          });
-      });
     }
+    /*
+    hide - show form after click on adding agenda 
+     */
+    $scope.addingAgendaForm = false;
+    $scope.myButton = 'Add New Agenda Talk';
+    $scope.showAddingAgenda = function() {
+      $scope.addingAgendaForm = $scope.addingAgendaForm ? false : true;
+    };
+    /*
+    Change add agenda button text after clicking
+     */
+    $scope.changeButton = function(){
+      if($scope.myButton === "Add New Agenda Talk"){
+      $scope.myButton = 'Hide';
+    }else{
+      $scope.myButton = "Add New Agenda Talk";
+    }
+    };
+    //retrieve agenda by condition
+    backendService.loadAgendaWithParams($stateParams.eventId).then(function (res) {
+      $scope.agendaList = res;
+    }, function (error) {
+      console.log("Error by retrieving the event", error)
+    })
   })
 
   /*
@@ -327,9 +287,10 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
     $scope.goToEdit = function () {
       $state.go('app.edit-account');
     };
+
     //delete account function
     $scope.deleteAccount = function (user) {
-      var susUser = user.username;
+      var susUser = user.username; //user = object --> user.username = needed variable
       var confirmPopup = $ionicPopup.confirm({
         title: 'Delete Account',
         template: 'Are you sure you want to delete your account?'
@@ -348,6 +309,7 @@ angular.module('starter.controllers', ['services', 'ngCordova'])
               });
             })
           });
+
           console.log('You are sure');
         } else {
           console.log('You are not sure');

@@ -246,9 +246,14 @@ var BaasBox = (function() {
         })
       },
 
-      loadCollectionWithParams: function(collection, params) {
+
+
+      /*
+      Function to load a collection of agendas, which have been created in the same event
+      */
+      loadAgendaWithParams: function(collection, evId, params) {
         var deferred = buildDeferred();
-        var url = BaasBox.endPoint + '/document/' + collection;
+        var url = BaasBox.endPoint + '/document/' + collection + '?where=eventID%3D%3F&params=' + evId;
         var req = $.ajax({
             url: url,
             method: 'GET',
@@ -264,6 +269,26 @@ var BaasBox = (function() {
           })
         return deferred.promise();
       },
+
+      loadCollectionWithParams: function(collection, params) {
+        var deferred = buildDeferred();
+        var url = BaasBox.endPoint + '/document/' + collection;
+        var req = $.ajax({
+          url: url,
+          method: 'GET',
+          timeout: BaasBox.timeout,
+          dataType: 'json',
+          data: params
+        })
+          .done(function(res) {
+            deferred.resolve(res['data']);
+          })
+          .fail(function(error) {
+            deferred.reject(error);
+          })
+        return deferred.promise();
+      },
+      //
 
       loadCollection: function(collection) {
         return BaasBox.loadCollectionWithParams(collection, {page: 0, recordsPerPage: BaasBox.pagelength});
@@ -298,19 +323,23 @@ var BaasBox = (function() {
         return deferred.promise();
       },
 
-      updateField: function(objectId, collection, fieldName, newValue) {
+      /*
+      function to add eventID to agendas, which have been created in this event
+      */
+
+      updateEventAgenda: function(object, evId) {
         var deferred = buildDeferred();
-        url = BaasBox.endPoint + '/document/' + collection + '/' + objectId + '/.' + fieldName;
+        url = BaasBox.endPoint + '/document/agenda/' + object.id + '/.' + 'eventID'; //
         var json = JSON.stringify({
-            "data": newValue
+          "data": evId
         });
         var req = $.ajax({
-          url: url,
-          type: 'PUT',
-          contentType: 'application/json',
-          dataType: 'json',
-          data: json
-        })
+            url: url,
+            type: 'PUT',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: json
+           })
           .done(function(res) {
             deferred.resolve(res['data']);
           })
@@ -319,6 +348,7 @@ var BaasBox = (function() {
           })
         return deferred.promise();
       },
+
 
       deleteObject: function(objectId, collection) {
         return $.ajax({
@@ -440,10 +470,6 @@ var BaasBox = (function() {
         return $.get(BaasBox.endPoint + '/user/' + user.username + '/password/reset');
       },
 
-      resetPasswordForUser: function(user) {
-        return $.get(BaasBox.endPoint + '/user/' + user.email + '/password/reset');
-      },
-
       followUser: function (username) {
         return $.post(BaasBox.endPoint + '/follow/' + username);
       },
@@ -486,10 +512,6 @@ var BaasBox = (function() {
 
       fetchFile: function(fileId) {
         return $.get(BaasBox.endPoint + '/file/' + fileId + "?X-BB-SESSION=" + BaasBox.getCurrentUser().token)
-      },
-
-      getFileUrl: function (fileId) {
-        return ""+BaasBox.endPoint + '/file/' + fileId + "?download=true&X-BB-SESSION=" + BaasBox.getCurrentUser().token
       },
 
       deleteFile: function(fileId) {
